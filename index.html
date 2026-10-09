@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رمزك | صانع رموز QR الاحترافي</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="رمزك">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    :root[data-theme="light"] {
+      --bg-page: #f8fafc;
+      --surface-card: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-color: #0284c7;
+      --accent-hover: #0369a1;
+      --brand-glow: 0 4px 20px rgba(2, 132, 199, 0.2);
+      --border-color: #e2e8f0;
+      --qr-preview-bg: #f8fafc;
+      --theme-btn-bg: #f1f5f9;
+      --theme-btn-color: #0f172a;
+      --theme-btn-border: #cbd5e1;
+    }
+
+    :root[data-theme="dark"] {
+      --bg-page: #050505;
+      --surface-card: #111111;
+      --surface-subtle: #1a1a1a;
+      --text-main: #ffffff;
+      --text-muted: #a1a1aa;
+      --accent-color: #a3e635;
+      --accent-hover: #84cc16;
+      --brand-glow: 0 0 25px rgba(163, 230, 53, 0.35);
+      --border-color: #262626;
+      --qr-preview-bg: #0a0a0a;
+      --theme-btn-bg: #1a1a1a;
+      --theme-btn-color: #a3e635;
+      --theme-btn-border: #333333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      padding: 20px 8%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--surface-card);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 10;
+    }
+
+    .brand-logo {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: var(--accent-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+
+    .brand-logo span {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 1.05rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .install-app-btn {
+      display: none;
+      background: var(--accent-color);
+      color: #ffffff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      animation: pulse 2s infinite;
+    }
+
+    :root[data-theme="dark"] .install-app-btn {
+      color: #000000;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+
+    .theme-icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--theme-btn-bg);
+      border: 1.5px solid var(--theme-btn-border);
+      color: var(--theme-btn-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      outline: none;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .theme-icon-btn:hover {
+      transform: scale(1.08) rotate(10deg);
+    }
+
+    .theme-icon-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 25px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .hero-text {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .hero-text h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .hero-text h1 span {
+      color: var(--accent-color);
+    }
+
+    .hero-text p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .generator-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 25px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+
+    @media (max-width: 850px) {
+      .generator-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+      }
+      .hero-text h1 {
+        font-size: 1.8rem;
+      }
+    }
+
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    textarea {
+      width: 100%;
+      height: 105px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-color);
+      background: var(--surface-subtle);
+      color: var(--text-main);
+      font-size: 1rem;
+      resize: none;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    :root[data-theme="dark"] textarea:focus {
+      box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.15);
+    }
+
+    .file-upload-box {
+      position: relative;
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .file-upload-box input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-status {
+      font-size: 0.85rem;
+      color: var(--accent-color);
+      font-weight: 700;
+    }
+
+    .remove-logo-btn {
+      align-self: flex-start;
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: none;
+      font-weight: 600;
+    }
+
+    .export-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .formats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .format-btn {
+      padding: 10px;
+      border: 1.5px solid var(--border-color);
+      background: var(--surface-subtle);
+      color: var(--text-main);
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .format-btn.active {
+      border-color: var(--accent-color);
+      background: var(--surface-card);
+      color: var(--accent-color);
+    }
+
+    .btn-main-download {
+      width: 100%;
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent-color);
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: var(--brand-glow);
+    }
+
+    :root[data-theme="dark"] .btn-main-download {
+      color: #000000;
+    }
+
+    .btn-main-download:hover {
+      opacity: 0.92;
+    }
+
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--qr-preview-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 330px;
+    }
+
+    #qr-canvas-wrapper {
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-tip {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      background-color: var(--surface-card);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
+    .author-link {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 800;
+      display: inline-block;
+    }
+
+    .author-link:hover {
+      color: var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-logo">
+      رمزك <span>| RmzK</span>
+    </div>
+    
+    <div class="header-actions">
+      <button class="install-app-btn" id="install-btn" onclick="installApp()">📲 تثبيت التطبيق</button>
+      <button class="theme-icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="تبديل الثيم">
+        <svg id="theme-svg" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-text">
+      <h1>حوّل أي رابط أو نص إلى <span>بصمة ذكية</span></h1>
+      <p>أداة فائقة الدقة لصناعة رموز استجابة سريعة QR أنيقة، مخصصة بشعارك ومجهزة للطباعة والمشاركة بأعلى جودة.</p>
+    </div>
+
+    <div class="generator-grid">
+      <div class="input-section">
+        <div class="form-group">
+          <label for="qr-data">المحتوى (رابط URL، رقم، أو نص):</label>
+          <textarea id="qr-data" placeholder="الصق الرابط هنا أو اكتب النص المطلوب بالعربي أو الإنجليزي..." oninput="updateQR()"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>إضافة لوجو أو صورة في المنتصف:</label>
+          <div class="file-upload-box">
+            <input type="file" id="logo-input" accept="image/*" onchange="handleLogoUpload(event)">
+            <p>اضغط لاختيار صورة اللوجو (PNG, JPG, SVG)</p>
+            <div id="file-status" class="file-status">لم يتم اختيار شعار</div>
+          </div>
+          <button type="button" class="remove-logo-btn" id="remove-logo" onclick="removeLogo()">إزالة الصورة ✕</button>
+        </div>
+
+        <div class="export-zone">
+          <label>اختر صيغة التحميل المطلوبة:</label>
+          <div class="formats-grid">
+            <button type="button" class="format-btn active" onclick="selectFormat('png', this)">PNG</button>
+            <button type="button" class="format-btn" onclick="selectFormat('jpeg', this)">JPEG</button>
+            <button type="button" class="format-btn" onclick="selectFormat('webp', this)">WEBP</button>
+            <button type="button" class="format-btn" onclick="selectFormat('svg', this)">SVG</button>
+            <button type="button" class="format-btn" onclick="selectFormat('pdf', this)">PDF</button>
+          </div>
+          <button type="button" class="btn-main-download" onclick="downloadQRCode()">تحميل رمز الـ QR الآن</button>
+        </div>
+      </div>
+
+      <div class="preview-section">
+        <div id="qr-canvas-wrapper"></div>
+        <div class="preview-tip">المعاينة تتم فورياً وبأعلى دقة تصحيح للأخطاء (Level H)</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    حقوق التصميم محفوظه <a href="https://www.facebook.com/ahmedadelofficial10" target="_blank" rel="noopener noreferrer" class="author-link">Ahmed🖤</a> ©️2026
+  </footer>
+
+  <script>
+    let selectedFormat = 'png';
+    let currentLogoUrl = '';
+    let deferredPrompt = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) installBtn.style.display = 'block';
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('install-btn').style.display = 'none';
+        });
+      }
+    }
+
+    const moonIcon = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+    const sunIcon = `
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    `;
+
+    function toUtf8(str) {
+      return unescape(encodeURIComponent(str));
+    }
+
+    const qrCode = new QRCodeStyling({
+      width: 240,
+      height: 240,
+      type: "canvas",
+      data: toUtf8("رمزك"),
+      image: "",
+      dotsOptions: {
+        color: "#0f172a",
+        type: "rounded"
+      },
+      backgroundOptions: {
+        color: "#ffffff"
+      },
+      imageOptions: {
+        crossOrigin: "anonymous",
+        margin: 5,
+        imageSize: 0.35
+      },
+      cornersSquareOptions: {
+        type: "extra-rounded",
+        color: "#0284c7"
+      },
+      cornersDotOptions: {
+        type: "dot",
+        color: "#0f172a"
+      },
+      qrOptions: {
+        errorCorrectionLevel: "H"
+      }
+    });
+
+    const container = document.getElementById("qr-canvas-wrapper");
+    qrCode.append(container);
+
+    function updateQR() {
+      const rawText = document.getElementById('qr-data').value.trim() || 'رمزك';
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      
+      qrCode.update({
+        data: toUtf8(rawText),
+        dotsOptions: {
+          color: isDark ? "#000000" : "#0f172a"
+        },
+        cornersSquareOptions: {
+          color: isDark ? "#a3e635" : "#0284c7"
+        },
+        cornersDotOptions: {
+          color: isDark ? "#000000" : "#0f172a"
+        }
+      });
+    }
+
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentLogoUrl = e.target.result;
+          qrCode.update({ image: currentLogoUrl });
+          document.getElementById('file-status').textContent = `تم إضافة: ${file.name}`;
+          document.getElementById('remove-logo').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeLogo() {
+      currentLogoUrl = '';
+      document.getElementById('logo-input').value = '';
+      document.getElementById('file-status').textContent = 'لم يتم اختيار شعار';
+      document.getElementById('remove-logo').style.display = 'none';
+      qrCode.update({ image: '' });
+    }
+
+    function selectFormat(fmt, btn) {
+      selectedFormat = fmt;
+      document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function downloadQRCode() {
+      const filename = `rmzk-${Date.now()}`;
+
+      if (selectedFormat === 'pdf') {
+        const rawBlob = await qrCode.getRawData('png');
+        const img = new Image();
+        img.src = URL.createObjectURL(rawBlob);
+
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 1000;
+          canvas.height = 1300;
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          ctx.textAlign = 'center';
+          ctx.direction = 'rtl';
+          ctx.fillStyle = '#0284c7';
+          ctx.font = 'bold 50px Tajawal, sans-serif';
+          ctx.fillText('رمزك  |  RmzK', 500, 180);
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = '500 24px Tajawal, sans-serif';
+          ctx.fillText('Generated by RmzK Platform', 500, 230);
+
+          ctx.drawImage(img, 200, 320, 600, 600);
+
+          const finalImage = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4"
+          });
+
+          pdf.addImage(finalImage, 'PNG', 20, 20, 170, 221);
+          pdf.save(`${filename}.pdf`);
+        };
+      } else {
+        qrCode.download({
+          name: filename,
+          extension: selectedFormat
+        });
+      }
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute('data-theme');
+      const target = current === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', target);
+
+      const svg = document.getElementById('theme-svg');
+      svg.innerHTML = (target === 'dark') ? sunIcon : moonIcon;
+
+      updateQR();
+    }
+  </script>
+</body>
+</html>
