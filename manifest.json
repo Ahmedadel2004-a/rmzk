@@ -1,0 +1,10 @@
+{
+  "name": "رمزك | صانع رموز QR الاحترافي",
+  "short_name": "رمزك",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#0284c7",
+  "description": "أداة احترافية لتوليد رموز الـ QR وتحميلها بكافة الصيغ"
+}
